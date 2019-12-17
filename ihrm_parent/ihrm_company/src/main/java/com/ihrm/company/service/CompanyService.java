@@ -36,7 +36,7 @@ public class CompanyService {
     /**
      * 更新企业
      *  1.参数：Company
-     *  2.根据id查询企业对象
+     *  2.根据id查询企业对象lombok
      *  3.设置修改的属性
      *  4.调用dao完成更新
      */
