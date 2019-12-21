@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 /**
  * 部门dao接口
  */
-public interface DepartmentDao extends JpaRepository<Department,String>, JpaSpecificationExecutor<Department> {
+public interface DepartmentDao extends JpaRepository<Department,String> ,JpaSpecificationExecutor<Department> {
 }

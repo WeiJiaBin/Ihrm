@@ -13,6 +13,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class DepartmentService extends BaseService {
@@ -55,7 +56,11 @@ public class DepartmentService extends BaseService {
      * 3、根据id查询部门
      */
     public Department findById(String id) {
-        return departmentDao.findById(id).get();
+        System.out.println("****************************");
+        Optional<Department> departmentDaoById = this.departmentDao.findById(id);
+
+        return departmentDaoById.get();
+        //  return departmentDao.findById(id).get();
     }
 
     /**

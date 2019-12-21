@@ -62,6 +62,7 @@ public class DeparmentController extends BaseController {
      */
     @GetMapping("department/{id}")
     public Result findById(@PathVariable("id") String id) {
+        System.out.println("id是："+id);
         Department department = this.departmentService.findById(id);
         return new Result(ResultCode.SUCCESS, department);
     }
