@@ -12,6 +12,7 @@ import com.ihrm.domain.company.response.DeptListResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 //1、解决跨域
@@ -33,6 +34,8 @@ public class DeparmentController extends BaseController {
     //1、设置保存的企业id
 //        String companyId = "1";
         department.setCompanyId(companyId);
+        department.setCreateTime(new Date());
+
         //2、调用service 完成保存企业
         this.departmentService.save(department);
         //3、构造返回结果
@@ -62,7 +65,7 @@ public class DeparmentController extends BaseController {
      */
     @GetMapping("department/{id}")
     public Result findById(@PathVariable("id") String id) {
-        System.out.println("id是："+id);
+
         Department department = this.departmentService.findById(id);
         return new Result(ResultCode.SUCCESS, department);
     }

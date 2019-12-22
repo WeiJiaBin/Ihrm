@@ -56,7 +56,7 @@ public class DepartmentService extends BaseService {
      * 3、根据id查询部门
      */
     public Department findById(String id) {
-        System.out.println("****************************");
+
         Optional<Department> departmentDaoById = this.departmentDao.findById(id);
 
         return departmentDaoById.get();
