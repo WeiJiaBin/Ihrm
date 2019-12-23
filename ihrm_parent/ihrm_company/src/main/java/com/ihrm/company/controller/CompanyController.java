@@ -13,14 +13,14 @@ import java.util.List;
 //解决跨域问题
 @CrossOrigin
 @RestController
-@RequestMapping("company")
+@RequestMapping(value="/company")
 public class CompanyController {
 
     @Autowired
     private CompanyService companyService;
 
     //保存企业
-    @PostMapping
+    @RequestMapping(value="",method = RequestMethod.POST)
     public Result save(@RequestBody Company company)  {
         //业务操作
         companyService.add(company);
@@ -51,7 +51,7 @@ public class CompanyController {
     //根据id查询企业
     @RequestMapping(value="/{id}",method = RequestMethod.GET)
     public Result findById(@PathVariable(value="id") String id) throws CommonException {
-      //  throw new CommonException(ResultCode.UNAUTHORISE);
+        //throw new CommonException(ResultCode.UNAUTHORISE);
         Company company = companyService.findById(id);
         Result result = new Result(ResultCode.SUCCESS);
         result.setData(company);
@@ -59,7 +59,7 @@ public class CompanyController {
     }
 
     //查询全部企业列表
-    @GetMapping
+    @RequestMapping(value="",method = RequestMethod.GET)
     public Result findAll() {
         //int i = 1/0;
         List<Company> list = companyService.findAll();
