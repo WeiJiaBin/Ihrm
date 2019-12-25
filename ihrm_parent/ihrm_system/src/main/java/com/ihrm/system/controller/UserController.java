@@ -7,9 +7,11 @@ import com.ihrm.common.entity.Result;
 import com.ihrm.common.entity.ResultCode;
 import com.ihrm.common.exception.CommonException;
 import com.ihrm.common.utils.JwtUtils;
+import com.ihrm.domain.system.Permission;
 import com.ihrm.domain.system.response.ProfileResult;
 import com.ihrm.domain.system.User;
 import com.ihrm.domain.system.response.UserResult;
+import com.ihrm.system.service.PermissionService;
 import com.ihrm.system.service.UserService;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,9 @@ public class UserController extends BaseController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private PermissionService permissionService;
 
     @Autowired
     private JwtUtils jwtUtils;
@@ -166,7 +171,25 @@ public class UserController extends BaseController {
         Claims claims = jwtUtils.parseJwt(token);
         String userid = claims.getId();
         User user = userService.findById(userid);
-        ProfileResult result = new ProfileResult(user);
+        ProfileResult result = null;
+
+        if ("user".equals(user.getLevel())) {
+            result = new ProfileResult(user);
+        }else{
+            Map map = new HashMap();
+            if ("coAdmin".equals(user.getLevel())) {
+                map.put("enVisible", "1");
+            }
+            List<Permission> list = permissionService.findAll(map);
+            result = new ProfileResult(user,list);
+        }
+
+
+
+
+
+
+
         return new Result(ResultCode.SUCCESS,result);
     }
 }
