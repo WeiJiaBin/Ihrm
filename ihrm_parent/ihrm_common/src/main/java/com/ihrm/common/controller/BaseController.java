@@ -13,7 +13,7 @@ public class BaseController {
     protected String companyId;
     protected String companyName;
     protected Claims claims;
-    //ModelAttribute  执行controller之前执行
+//ModelAttribute在进入controller之前执行
     @ModelAttribute
     public void setResAnReq(HttpServletRequest request,HttpServletResponse response) {
         this.request = request;
@@ -21,13 +21,12 @@ public class BaseController {
 
         Object obj = request.getAttribute("user_claims");
 
-        if (obj != null) {
-            this.claims= (Claims)obj;
-            this.companyId=(String) claims.get("companyId");
-            this.companyName=(String) claims.get("companyName");
+        if(obj != null) {
+            this.claims = (Claims) obj;
+            this.companyId = (String)claims.get("companyId");
+
+            this.companyName = (String)claims.get("companyName");
         }
-
-
     }
 
 }
