@@ -3,8 +3,8 @@ package com.ihrm.system.controller;
 import com.ihrm.common.controller.BaseController;
 import com.ihrm.common.entity.PageResult;
 import com.ihrm.common.entity.Result;
-
 import com.ihrm.common.entity.ResultCode;
+
 import com.ihrm.common.exception.CommonException;
 import com.ihrm.common.utils.JwtUtils;
 import com.ihrm.common.utils.PermissionConstants;
@@ -14,8 +14,15 @@ import com.ihrm.domain.system.response.ProfileResult;
 import com.ihrm.domain.system.User;
 import com.ihrm.domain.system.response.UserResult;
 import com.ihrm.system.service.PermissionService;
+import com.ihrm.system.service.RoleService;
 import com.ihrm.system.service.UserService;
 import io.jsonwebtoken.Claims;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.crypto.hash.Md5Hash;
+import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.util.StringUtils;
@@ -47,7 +54,7 @@ public class UserController extends BaseController {
      * 分配角色
      */
     @RequestMapping(value = "/user/assignRoles", method = RequestMethod.PUT)
-    public Result save(@RequestBody Map<String,Object> map) {
+    public Result assignRoles(@RequestBody Map<String,Object> map) {
         //1.获取被分配的用户id
         String userId = (String) map.get("id");
         //2.获取到角色的id列表
@@ -112,12 +119,18 @@ public class UserController extends BaseController {
     /**
      * 根据id删除
      */
+    @RequiresPermissions(value = "API-USER-DELETE")
     @RequestMapping(value = "/user/{id}", method = RequestMethod.DELETE,name = "API-USER-DELETE")
     public Result delete(@PathVariable(value = "id") String id) {
         userService.deleteById(id);
         return new Result(ResultCode.SUCCESS);
     }
 
+
+    public static void main(String[] args) {
+        String password = new Md5Hash("123456","13800000003",3).toString();
+        System.out.println(password);
+    }
 
     /**
      * 用户登录
@@ -130,31 +143,49 @@ public class UserController extends BaseController {
     public Result login(@RequestBody Map<String,String> loginMap) {
         String mobile = loginMap.get("mobile");
         String password = loginMap.get("password");
-        User user = userService.findByMobile(mobile);
-        //登录失败
-        if(user == null || !user.getPassword().equals(password)) {
+        try {
+            //1.构造登录令牌 UsernamePasswordToken
+            //加密密码
+            password = new Md5Hash(password,mobile,3).toString();  //1.密码，盐，加密次数
+            UsernamePasswordToken upToken = new UsernamePasswordToken(mobile,password);
+            //2.获取subject
+            Subject subject = SecurityUtils.getSubject();
+            //3.调用login方法，进入realm完成认证
+            subject.login(upToken);
+            //4.获取sessionId
+            String sessionId = (String)subject.getSession().getId();
+            //5.构造返回结果
+            return new Result(ResultCode.SUCCESS,sessionId);
+        }catch (Exception e) {
+            e.printStackTrace();
             return new Result(ResultCode.MOBILEORPASSWORDERROR);
-        }else {
-            //登录成功
-            //api权限字符串
-            StringBuilder sb = new StringBuilder();
-            //获取到所有的可访问API权限
-            for (Role role : user.getRoles()) {
-                for (Permission perm : role.getPermissions()) {
-                    if(perm.getType() == PermissionConstants.PERMISSION_API) {
-                        sb.append(perm.getCode()).append(",");
-                    }
-                }
-            }
-            Map<String,Object> map = new HashMap<>();
-            map.put("apis",sb.toString());//可访问的api权限字符串
-            map.put("companyId",user.getCompanyId());
-            map.put("companyName",user.getCompanyName());
-            String token = jwtUtils.createJwt(user.getId(), user.getUsername(), map);
-            return new Result(ResultCode.SUCCESS,token);
         }
-    }
 
+
+//        User user = userService.findByMobile(mobile);
+//        //登录失败
+//        if(user == null || !user.getPassword().equals(password)) {
+//            return new Result(ResultCode.MOBILEORPASSWORDERROR);
+//        }else {
+//            //登录成功
+//            //api权限字符串
+//            StringBuilder sb = new StringBuilder();
+//            //获取到所有的可访问API权限
+//            for (Role role : user.getRoles()) {
+//                for (Permission perm : role.getPermissions()) {
+//                    if(perm.getType() == PermissionConstants.PERMISSION_API) {
+//                        sb.append(perm.getCode()).append(",");
+//                    }
+//                }
+//            }
+//            Map<String,Object> map = new HashMap<>();
+//            map.put("apis",sb.toString());//可访问的api权限字符串
+//            map.put("companyId",user.getCompanyId());
+//            map.put("companyName",user.getCompanyName());
+//            String token = jwtUtils.createJwt(user.getId(), user.getUsername(), map);
+//            return new Result(ResultCode.SUCCESS,token);
+//        }
+    }
 
 
     /**
@@ -166,40 +197,30 @@ public class UserController extends BaseController {
      */
     @RequestMapping(value="/profile",method = RequestMethod.POST)
     public Result profile(HttpServletRequest request) throws Exception {
+        //获取session中的安全数据
+        Subject subject = SecurityUtils.getSubject();
+        //1.subject获取所有的安全数据集合
+        PrincipalCollection principals = subject.getPrincipals();
+        //2.获取安全数据
+        ProfileResult result = (ProfileResult)principals.getPrimaryPrincipal();
 
-        /**
-         * 从请求头信息中获取token数据
-         *   1.获取请求头信息：名称=Authorization
-         *   2.替换Bearer+空格
-         *   3.解析token
-         *   4.获取clamis
-         */
-        //1.获取请求头信息：名称=Authorization
-//        String authorization = request.getHeader("Authorization");
-//        if(StringUtils.isEmpty(authorization)) {
-//            throw new CommonException(ResultCode.UNAUTHENTICATED);
+//        String userid = claims.getId();
+//        //获取用户信息
+//        User user = userService.findById(userid);
+//        //根据不同的用户级别获取用户权限
+//
+//        ProfileResult result = null;
+//
+//        if("user".equals(user.getLevel())) {
+//            result = new ProfileResult(user);
+//        }else {
+//            Map map = new HashMap();
+//            if("coAdmin".equals(user.getLevel())) {
+//                map.put("enVisible","1");
+//            }
+//            List<Permission> list = permissionService.findAll(map);
+//            result = new ProfileResult(user,list);
 //        }
-//        //2.替换Bearer+空格
-//        String token = authorization.replace("Bearer ","");
-//        //3.解析token
-//        Claims claims = jwtUtils.parseJwt(token);
-        String userid = claims.getId();
-        User user = userService.findById(userid);
-        ProfileResult result = null;
-
-        if ("user".equals(user.getLevel())) {
-            result = new ProfileResult(user);
-        }else{
-            Map map = new HashMap();
-            if ("coAdmin".equals(user.getLevel())) {
-                map.put("enVisible", "1");
-            }
-            List<Permission> list = permissionService.findAll(map);
-            result = new ProfileResult(user,list);
-        }
-
-
-
         return new Result(ResultCode.SUCCESS,result);
     }
 }
