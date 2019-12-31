@@ -29,8 +29,7 @@ public class UserRealm extends IhrmRealm {
         String password = new String( upToken.getPassword());
         //2.根据手机号查询用户
         User user = userService.findByMobile(mobile);
-        System.out.println("输入"+password);
-        System.out.println("用户"+user.getPassword());
+
         //3.判断用户是否存在，用户密码是否和输入密码一致
         if(user != null && user.getPassword().equals(password)) {
             //4.构造安全数据并返回（安全数据：用户基本数据，权限信息 profileResult）
@@ -47,7 +46,7 @@ public class UserRealm extends IhrmRealm {
             }
             //构造方法：安全数据，密码，realm域名
             SimpleAuthenticationInfo info = new SimpleAuthenticationInfo(result,user.getPassword(),this.getName());
-            System.out.println("进来了");
+
             return info;
         }
         //返回null，会抛出异常，标识用户名和密码不匹配
