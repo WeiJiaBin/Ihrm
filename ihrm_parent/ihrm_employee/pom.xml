@@ -10,10 +10,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>ihrm_employee</artifactId>
-    <packaging>pom</packaging>
-    <modules>
+    <!--<packaging>jar</packaging>-->
+    <!--<modules>
         <module>../ihrm_eureka</module>
-    </modules>
+    </modules>-->
 
     <dependencies>
         <dependency>
