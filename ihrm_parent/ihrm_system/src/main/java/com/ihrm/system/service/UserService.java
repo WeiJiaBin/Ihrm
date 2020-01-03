@@ -1,8 +1,11 @@
 package com.ihrm.system.service;
 
+import com.ihrm.common.service.BaseService;
 import com.ihrm.common.utils.IdWorker;
+import com.ihrm.domain.company.Department;
 import com.ihrm.domain.system.Role;
 import com.ihrm.domain.system.User;
+import com.ihrm.system.client.DepartmentFeignClient;
 import com.ihrm.system.dao.RoleDao;
 import com.ihrm.system.dao.UserDao;
 import org.apache.shiro.crypto.hash.Md5Hash;
@@ -11,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -21,7 +25,7 @@ import java.lang.annotation.Target;
 import java.util.*;
 
 @Service
-public class UserService {
+public class UserService extends BaseService{
 
     @Autowired
     private UserDao userDao;
@@ -40,13 +44,45 @@ public class UserService {
         return userDao.findByMobile(mobile);
     }
 
+
+    @Autowired
+    private DepartmentFeignClient departmentFeignClient;
+
+    /**
+     * 批量保存用户
+     */
+    @Transactional
+    public void saveAll(List<User> list ,String companyId,String companyName){
+        for (User user : list) {
+            //默认密码
+            user.setPassword(new Md5Hash("123456",user.getMobile(),3).toString());
+            //id
+            user.setId(idWorker.nextId()+"");
+            //基本属性
+            user.setCompanyId(companyId);
+            user.setCompanyName(companyName);
+            user.setInServiceStatus(1);
+            user.setEnableState(1);
+            user.setLevel("user");
+
+            //填充部门的属性
+            Department department = departmentFeignClient.findByCode(user.getDepartmentId(), companyId);
+            if(department != null) {
+                user.setDepartmentId(department.getId());
+                user.setDepartmentName(department.getName());
+            }
+
+            userDao.save(user);
+        }
+    }
+
     /**
      * 1.保存用户
      */
     public void save(User user) {
         //设置主键的值
         String id = idWorker.nextId()+"";
-        String password = new Md5Hash("123456", user.getMobile(), 3).toString();
+        String password = new Md5Hash("123456",user.getMobile(),3).toString();
         user.setLevel("user");
         user.setPassword(password);//设置初始密码
         user.setEnableState(1);
@@ -77,6 +113,9 @@ public class UserService {
         return userDao.findById(id).get();
     }
 
+    public List<User> findAll(String companyId) {
+        return userDao.findAll(super.getSpec(companyId));
+    }
     /**
      * 4.查询全部用户列表
      *      参数：map集合的形式

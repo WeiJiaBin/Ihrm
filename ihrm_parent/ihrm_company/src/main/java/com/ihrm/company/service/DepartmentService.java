@@ -13,7 +13,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class DepartmentService extends BaseService {
@@ -25,42 +24,35 @@ public class DepartmentService extends BaseService {
     private IdWorker idWorker;
 
     /**
-     * 1、保存部门
+     * 1.保存部门
      */
     public void save(Department department) {
         //设置主键的值
-        String id = idWorker.nextId() + "";
+        String id = idWorker.nextId()+"";
         department.setId(id);
         //调用dao保存部门
         departmentDao.save(department);
     }
 
     /**
-     * 2、更新部门
+     * 2.更新部门
      */
-    public void updete(Department department) {
-        //1、根据id查询部门
+    public void update(Department department) {
+        //1.根据id查询部门
         Department dept = departmentDao.findById(department.getId()).get();
-        if (dept == null) {
-            return;
-        }
-        //2、设置部门属性
+        //2.设置部门属性
         dept.setCode(department.getCode());
         dept.setIntroduce(department.getIntroduce());
         dept.setName(department.getName());
-        //3、更新部门
+        //3.更新部门
         departmentDao.save(dept);
     }
 
     /**
-     * 3、根据id查询部门
+     * 3.根据id查询部门
      */
     public Department findById(String id) {
-
-        Optional<Department> departmentDaoById = this.departmentDao.findById(id);
-
-        return departmentDaoById.get();
-        //  return departmentDao.findById(id).get();
+        return departmentDao.findById(id).get();
     }
 
     /**
@@ -72,7 +64,6 @@ public class DepartmentService extends BaseService {
          *      1.只查询companyId
          *      2.很多的地方都需要根据companyId查询
          *      3.很多的对象中都具有companyId
-         *      进行了抽取，直接在父类中使用
          *
          */
 //        Specification<Department> spec = new Specification<Department>() {
@@ -91,9 +82,16 @@ public class DepartmentService extends BaseService {
     }
 
     /**
-     * 5、根据id删除部门
+     * 5.根据id删除部门
      */
     public void deleteById(String id) {
-        this.departmentDao.deleteById(id);
+        departmentDao.deleteById(id);
+    }
+
+    /**
+     * 根据部门编码和企业id查询部门
+     */
+    public Department findByCode(String code, String companyId) {
+        return departmentDao.findByCodeAndCompanyId(code,companyId);
     }
 }

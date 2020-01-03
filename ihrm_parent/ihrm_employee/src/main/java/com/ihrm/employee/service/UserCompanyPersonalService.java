@@ -11,6 +11,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Created with IDEA
+ * Author:xzengsf
+ * Date:2018/10/19 9:52
+ * Description:
  */
 @Service
 public class UserCompanyPersonalService {
@@ -24,4 +28,9 @@ public class UserCompanyPersonalService {
     public UserCompanyPersonal findById(String userId) {
         return userCompanyPersonalDao.findByUserId(userId);
     }
+
+    public List<EmployeeReportResult> findByReport(String companyId,String month) {
+        return userCompanyPersonalDao.findByReport(companyId,month+"%");
+    }
+
 }
