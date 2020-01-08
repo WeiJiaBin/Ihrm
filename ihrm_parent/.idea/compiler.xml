@@ -15,9 +15,6 @@
         <module name="ihrm_common" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="ihrm_eureka" target="1.8" />
-    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
