@@ -74,8 +74,6 @@ public class ShiroConfiguration {
     private String host;
     @Value("${spring.redis.port}")
     private int port;
-    @Value("${spring.redis.timeout}")
-    private int timeout;
 
     /**
      * 1.redis的控制器，操作redis
@@ -84,8 +82,6 @@ public class ShiroConfiguration {
         RedisManager redisManager = new RedisManager();
         redisManager.setHost(host);
         redisManager.setPort(port);
-        redisManager.setTimeout(timeout);
-
         return redisManager;
     }
 
@@ -103,13 +99,9 @@ public class ShiroConfiguration {
      */
     public DefaultWebSessionManager sessionManager() {
         CustomSessionManager sessionManager = new CustomSessionManager();
-        sessionManager.setSessionDAO(redisSessionDAO());
-        //禁用cookie
-        sessionManager.setSessionIdCookieEnabled(false);
-        //禁用url重写   url;jsessionid=id
+        //sessionManager.setSessionIdCookieEnabled(false);
         sessionManager.setSessionIdUrlRewritingEnabled(false);
-
-        sessionManager.setGlobalSessionTimeout(3600 * 1000);//单位毫
+        sessionManager.setSessionDAO(redisSessionDAO());
         return sessionManager;
     }
 

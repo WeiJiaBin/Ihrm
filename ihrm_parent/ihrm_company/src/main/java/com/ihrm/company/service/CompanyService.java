@@ -2,7 +2,6 @@ package com.ihrm.company.service;
 
 import com.ihrm.common.utils.IdWorker;
 import com.ihrm.company.dao.CompanyDao;
-
 import com.ihrm.domain.company.Company;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,7 +35,7 @@ public class CompanyService {
     /**
      * 更新企业
      *  1.参数：Company
-     *  2.根据id查询企业对象lombok
+     *  2.根据id查询企业对象
      *  3.设置修改的属性
      *  4.调用dao完成更新
      */

@@ -1,15 +1,20 @@
 package com.ihrm.common.poi;
 
 import com.ihrm.domain.poi.ExcelAttribute;
+import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.ss.format.CellFormat;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,8 +24,9 @@ import java.util.List;
 public class ExcelImportUtil<T> {
  
     private Class clazz;
-    private Field fields[];
- 
+    private  Field fields[];
+
+    //参数：
     public ExcelImportUtil(Class clazz) {
         this.clazz = clazz;
         fields = clazz.getDeclaredFields();
@@ -28,21 +34,20 @@ public class ExcelImportUtil<T> {
  
     /**
      * 基于注解读取excel
+     *      is     : 文件上传的流信息
+     *      rowIndex:   读取数据的起始行
+     *      cellIndex:  读取数据的其实单元格位置
+     *
      */
-    public List<T> readExcel(InputStream is, int rowIndex, int cellIndex) {
+    public List<T> readExcel(InputStream is, int rowIndex,int cellIndex) {
         List<T> list = new ArrayList<T>();
         T entity = null;
         try {
             XSSFWorkbook workbook = new XSSFWorkbook(is);
             Sheet sheet = workbook.getSheetAt(0);
-            // 不准确
-            int rowLength = sheet.getLastRowNum();
-
-            System.out.println(sheet.getLastRowNum());
             for (int rowNum = rowIndex; rowNum <= sheet.getLastRowNum(); rowNum++) {
                 Row row = sheet.getRow(rowNum);
                 entity = (T) clazz.newInstance();
-                System.out.println(row.getLastCellNum());
                 for (int j = cellIndex; j < row.getLastCellNum(); j++) {
                     Cell cell = row.getCell(j);
                     for (Field field : fields) {
@@ -50,6 +55,7 @@ public class ExcelImportUtil<T> {
                             field.setAccessible(true);
                             ExcelAttribute ea = field.getAnnotation(ExcelAttribute.class);
                             if(j == ea.sort()) {
+                                System.out.println(covertAttrType(field, cell));
                                 field.set(entity, covertAttrType(field, cell));
                             }
                         }

@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
  *      1.声明异常处理器
  *      2.对异常统一处理
  */
-//@ControllerAdvice
+@ControllerAdvice
 public class BaseExceptionHandler {
 
     @ExceptionHandler(value = Exception.class)
@@ -37,7 +37,6 @@ public class BaseExceptionHandler {
     @ExceptionHandler(value = AuthorizationException.class)
     @ResponseBody
     public Result error(HttpServletRequest request, HttpServletResponse response,AuthorizationException e) {
-        System.out.println("权限不足************************");
         return new Result(ResultCode.UNAUTHORISE);
     }
 }

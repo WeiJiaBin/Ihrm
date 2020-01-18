@@ -55,15 +55,15 @@ public class JwtInterceptor extends HandlerInterceptorAdapter {
             //解析token获取claims
             Claims claims = jwtUtils.parseJwt(token);
             if(claims != null) {
-//                通过claims获取到当前用户的可访问API权限字符串
+                //通过claims获取到当前用户的可访问API权限字符串
                 String apis = (String) claims.get("apis");  //api-user-delete,api-user-update
-//                通过handler
+                //通过handler
                 HandlerMethod h = (HandlerMethod) handler;
-//                获取接口上的reqeustmapping注解
+                //获取接口上的reqeustmapping注解
                 RequestMapping annotation = h.getMethodAnnotation(RequestMapping.class);
-//                获取当前请求接口中的name属性
+                //获取当前请求接口中的name属性
                 String name = annotation.name();
-//                判断当前用户是否具有响应的请求权限
+                //判断当前用户是否具有响应的请求权限
                 if(apis.contains(name)) {
                     request.setAttribute("user_claims",claims);
                     return true;

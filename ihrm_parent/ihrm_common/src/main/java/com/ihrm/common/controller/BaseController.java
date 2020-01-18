@@ -15,25 +15,24 @@ public class BaseController {
     protected HttpServletRequest request;
     protected HttpServletResponse response;
     protected String companyId;
+    private String userId;
     protected String companyName;
     protected Claims claims;
 
     //使用jwt方式获取
-//ModelAttribute在进入controller之前执行
 //    @ModelAttribute
-////    public void setResAnReq(HttpServletRequest request,HttpServletResponse response) {
-////        this.request = request;
-////        this.response = response;
-////
-////        Object obj = request.getAttribute("user_claims");
-////
-////        if(obj != null) {
-////            this.claims = (Claims) obj;
-////            this.companyId = (String)claims.get("companyId");
-////
-////            this.companyName = (String)claims.get("companyName");
-////        }
-////    }
+//    public void setResAnReq(HttpServletRequest request,HttpServletResponse response) {
+//        this.request = request;
+//        this.response = response;
+//
+//        Object obj = request.getAttribute("user_claims");
+//
+//        if(obj != null) {
+//            this.claims = (Claims) obj;
+//            this.companyId = (String)claims.get("companyId");
+//            this.companyName = (String)claims.get("companyName");
+//        }
+//    }
 
     //使用shiro获取
     @ModelAttribute
@@ -50,6 +49,8 @@ public class BaseController {
             ProfileResult result = (ProfileResult)principals.getPrimaryPrincipal();
             this.companyId = result.getCompanyId();
             this.companyName = result.getCompany();
+            this.userId = result.getUserId();
         }
     }
+
 }

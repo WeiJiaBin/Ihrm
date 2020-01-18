@@ -4,7 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -25,12 +28,10 @@ public class Department implements Serializable {
     /**
      * 父级ID
      */
-
     private String pid;
     /**
      * 企业ID
      */
-    @Column(name="company_id")
     private String companyId;
     /**
      * 部门名称
@@ -44,7 +45,6 @@ public class Department implements Serializable {
     /**
      * 负责人ID
      */
-    @Column(name="manager_id")
     private String managerId;
     /**
 	*  负责人名称
@@ -58,6 +58,5 @@ public class Department implements Serializable {
     /**
      * 创建时间
      */
-    @Column(name="create_time")
     private Date createTime;
 }

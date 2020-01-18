@@ -10,7 +10,6 @@ import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.Date;
 
-
 /**
  * 实体类代码：
  *  属性
@@ -53,7 +52,6 @@ public class Company implements Serializable {
     /**
      * 公司名称
      */
-   // @Column(name="name") 映射数据库
     private String name;
     /**
      * 企业登录账号ID
@@ -123,6 +121,4 @@ public class Company implements Serializable {
      * 创建时间
      */
     private Date createTime;
-
-
 }

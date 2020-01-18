@@ -3,16 +3,21 @@ package com.ihrm.common.poi;
 import com.ihrm.domain.poi.ExcelAttribute;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.ss.formula.functions.T;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -29,7 +34,7 @@ public class ExcelExportUtil<T> {
     private Class clazz;        //对象的字节码
     private Field fields[];     //对象中的所有属性
 
-    public ExcelExportUtil(Class clazz, int rowIndex, int styleIndex) {
+    public ExcelExportUtil(Class clazz,int rowIndex,int styleIndex) {
         this.clazz = clazz;
         this.rowIndex = rowIndex;
         this.styleIndex = styleIndex;
@@ -45,7 +50,7 @@ public class ExcelExportUtil<T> {
                 fileName：生成的文件名
      *
      */
-    public void export(HttpServletResponse response, InputStream is, List<T> objs, String fileName) throws Exception {
+    public void export(HttpServletResponse response,InputStream is, List<T> objs,String fileName) throws Exception {
 
         //1.根据模板创建工作簿
         XSSFWorkbook workbook = new XSSFWorkbook(is);

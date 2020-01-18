@@ -60,6 +60,7 @@ public class ShiroConfiguration {
         Map<String,String> filterMap = new LinkedHashMap<>();
         //anon -- 匿名访问
         filterMap.put("/sys/login","anon");
+        filterMap.put("/sys/faceLogin/**","anon");
         filterMap.put("/autherror","anon");
         //注册
         //authc -- 认证之后访问（登录）
@@ -75,8 +76,6 @@ public class ShiroConfiguration {
     private String host;
     @Value("${spring.redis.port}")
     private int port;
-    @Value("${spring.redis.timeout}")
-    private int timeout;
 
     /**
      * 1.redis的控制器，操作redis
@@ -85,8 +84,6 @@ public class ShiroConfiguration {
         RedisManager redisManager = new RedisManager();
         redisManager.setHost(host);
         redisManager.setPort(port);
-        redisManager.setTimeout(timeout);
-
         return redisManager;
     }
 
@@ -106,11 +103,9 @@ public class ShiroConfiguration {
         CustomSessionManager sessionManager = new CustomSessionManager();
         sessionManager.setSessionDAO(redisSessionDAO());
         //禁用cookie
-        sessionManager.setSessionIdCookieEnabled(false);
+        //sessionManager.setSessionIdCookieEnabled(false);
         //禁用url重写   url;jsessionid=id
         sessionManager.setSessionIdUrlRewritingEnabled(false);
-
-        sessionManager.setGlobalSessionTimeout(3600 * 1000);//单位毫
         return sessionManager;
     }
 

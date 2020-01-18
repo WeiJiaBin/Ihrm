@@ -2,12 +2,15 @@ package com.ihrm.system.service;
 
 import com.ihrm.common.service.BaseService;
 import com.ihrm.common.utils.IdWorker;
+import com.ihrm.common.utils.QiniuUploadUtil;
 import com.ihrm.domain.company.Department;
 import com.ihrm.domain.system.Role;
 import com.ihrm.domain.system.User;
 import com.ihrm.system.client.DepartmentFeignClient;
 import com.ihrm.system.dao.RoleDao;
 import com.ihrm.system.dao.UserDao;
+import com.ihrm.system.utils.BaiduAiUtil;
+import com.sun.org.apache.xml.internal.security.utils.Base64;
 import org.apache.shiro.crypto.hash.Md5Hash;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,11 +19,13 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.io.IOException;
 import java.lang.annotation.Target;
 import java.util.*;
 
@@ -181,5 +186,57 @@ public class UserService extends BaseService{
         user.setRoles(roles);
         //3.更新用户
         userDao.save(user);
+    }
+
+    /**
+     * 完成图片处理
+     * @param id        ：用户id
+     * @param file      ：用户上传的头像文件
+     * @return          ：请求路径
+     */
+//    public String uploadImage(String id, MultipartFile file) throws IOException {
+//        //1.根据id查询用户
+//        User user = userDao.findById(id).get();
+//        //2.使用DataURL的形式存储图片（对图片byte数组进行base64编码）
+//        String encode = "data:image/png;base64,"+Base64.encode(file.getBytes());
+//        System.out.println(encode);
+//        //3.更新用户头像地址
+//        user.setStaffPhoto(encode);
+//        userDao.save(user);
+//        //4.返回
+//        return encode;
+//    }
+
+    @Autowired
+    private BaiduAiUtil baiduAiUtil;
+
+    /**
+     * 上传到七牛云存储
+     * 注册到百度云AI人脸库
+     *      1.调用百度云接口，判断当前用户是否已经注册
+     *      2.已注册，更新
+     *      3.未注册，注册
+     */
+    public String uploadImage(String id, MultipartFile file) throws IOException {
+        //1.根据id查询用户
+        User user = userDao.findById(id).get();
+        //2.将图片上传到七牛云存储，获取请求路径
+        String imgUrl = new QiniuUploadUtil().upload(user.getId(), file.getBytes());//上传图片名，图片的byte数组
+        //3.更新用户头像地址
+        user.setStaffPhoto(imgUrl);
+        userDao.save(user);
+
+        //判断是否已经注册面部信息
+        Boolean aBoolean = baiduAiUtil.faceExist(id);
+        String imgBase64 = Base64.encode(file.getBytes());
+        if (aBoolean) {
+            //更新
+            baiduAiUtil.faceUpdate(id,imgBase64);
+        }else{
+            //注册
+            baiduAiUtil.faceRegister(id,imgBase64);
+        }
+        //4.返回
+        return imgUrl;
     }
 }
